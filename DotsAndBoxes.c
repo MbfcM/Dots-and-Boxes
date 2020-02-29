@@ -22,6 +22,12 @@ int corCoordenadas;											//cor coordenadas
 int mJogo;													//modo de jogo escolhido (HxH || HxPC || PCxPC)
 int coords[2];												//coordenadas x y das jogadas dos PC
 
+//estrutura
+struct Data
+{
+	int dia, mes, ano;
+}dt;
+
 //Declaracao subrotinas
 void tipoJogo();														//escolher modo jogo
 void iniciaTabul();														//inicializar tabuleiro
@@ -38,6 +44,9 @@ int verificarValorIntroduzido(int nMenor, int nMaior, int opcao);		//verificar s
 int gerarNumero(int nMinimo, int nMaximo);								//gerar numeros aleatorios
 void textoPersonalizado(int centro, const char *string, ...);			//conseguir centrar texto e meter cor de forma mais simples
 void infJogo();															//informacoes acerca do jogo
+void ficheiros();														//guardar dados em ficheiro
+void lerFicheiro();														//ler dados do ficheiro
+void removerConteudoFicheiro();												//"remover" dados no ficheiro
 
 int main(int argc, char *argv[]) {
 
@@ -729,6 +738,9 @@ void atribuirPontos(char jogador)
 //Mostra pontuaçoes, tabuleiro como terminou e o vencedor
 void fimJogo()
 {
+	
+	int decisao;
+	
 	//mostrar tabuleiro
 	if(uJogadas == 0)
 		printf("Tabuleiro final do jogo:\n\n");
@@ -759,13 +771,103 @@ void fimJogo()
 		textoPersonalizado(1,"O jogador $%d %s $7 ganhou! Parabens!!!\a\a", corJogadorB, nomeJogadorB);
 		textoPersonalizado(1,"\n\t#%d \t\t\t\t\t\t\t\t#0 \n", corJogadorB);	
 	}
+	
+	printf("Insira a data (dia): ");
+	dt.dia = verificarValorIntroduzido(1, 31, 1);
+	printf("Insira a data (mes): ");
+	dt.mes = verificarValorIntroduzido(1, 12, 1);
+	printf("Insira a data (ano): ");
+	dt.ano = verificarValorIntroduzido(1, 3000, 1);
+	
+	ficheiros();
+	
+	do
+	{
+		printf("\Escolha opcao: 1 - ler dados || 2 - apagar todos dados || 3 - continuar ");
+	    decisao = verificarValorIntroduzido(1, 3, 0);
+	    
+	    switch(decisao){
+	            case 1 :						
+	                lerFicheiro();
+	                break;
+	            case 2 :						
+	                removerConteudoFicheiro();
+	                break;
+	            case 3 :						
+	                printf("");
+	                break;						
+	            default :						
+	                printf("\nEscolha invalida\n\n");
+    	}
+    }while(decisao != 3);
 
-    system("pause");
 
     if(uJogadas == 0)
         system("cls");
     else
     	puts("");
+}
+
+void ficheiros(){
+	
+	//criar e abrir ficheiro txt
+	FILE *Vencedores;
+	Vencedores = fopen("Ranking.txt", "a+"); 
+
+	//escrever no ficheiro
+	if(pontJogadorA == pontJogadorB)
+		fprintf(Vencedores, "Nao existiu vencedor na data: %d-%d-%d \n", dt.dia, dt.mes, dt.ano);			
+    else if(pontJogadorA > pontJogadorB)
+		fprintf(Vencedores, "O jogador: %s venceu com a pontuacao: %d na data: %d-%d-%d \n", nomeJogadorA, pontJogadorA, dt.dia, dt.mes, dt.ano);
+    else
+		fprintf(Vencedores, "O jogador: %s venceu com a pontuacao: %d na data: %d-%d-%d \n", nomeJogadorB, pontJogadorB, dt.dia, dt.mes, dt.ano);
+	
+	//fechar ficheiro txt
+	fclose(Vencedores);
+	
+	//mostrar mensagem que dados foram salvos
+	printf("Dados salvos! \n");
+	
+}
+
+void lerFicheiro(){
+	
+	char frase[300];
+	
+	FILE *Vencedores;
+	Vencedores = fopen("Ranking.txt", "r"); 
+
+	//ver se o ficheiro existe, se nao existir mostra mensagem
+	if(Vencedores == NULL)
+		perror("Erro. \n\n");
+	
+	//ler tudo que esta no ficheiro
+	while (fgets(frase, 300, Vencedores) != NULL) 
+		printf("%s", frase);
+	
+	fclose(Vencedores);
+	puts("");
+	
+}
+
+//remover conteudo ficheiros
+void removerConteudoFicheiro(){
+	
+	
+	char frase[300];
+	
+	FILE *Vencedores;
+	Vencedores = fopen("Ranking.txt", "w");  
+	
+	//remover dados do fichiero
+	gets(frase);
+	
+
+	fclose(Vencedores);
+	
+	//avisar que dados foram removidos
+	printf("Dados removidos! \n\n");
+	
 }
 
 //limita os valores e caracteres introduzidos pelo utilizador
